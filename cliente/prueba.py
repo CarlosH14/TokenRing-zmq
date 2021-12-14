@@ -13,7 +13,7 @@ def crear_cade(n_cad, t_cad): #n_cad: Número de cadenas, t_cad: tamaño de cade
 def c_servs(n):
     print("Número de servidores: {}".format(n))
     n_serv = n
-    servs = crear_cade(int(n_serv), 7)
+    servs = crear_cade(int(n_serv), 64)
     print("Nombres: {}".format(servs))
     return servs
 
