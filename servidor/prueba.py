@@ -14,6 +14,7 @@ def c_servs(n):
     print("Número de servidores: {}".format(n))
     n_serv = n
     servs = crear_cade(int(n_serv), 64)
+    servs.sort()
     print("Nombres: {}".format(servs))
     return servs
 

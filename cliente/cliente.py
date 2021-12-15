@@ -38,31 +38,9 @@ if __name__ == '__main__':
     nombre = sys.argv[1]
     funcion = sys.argv[2]
     aux = sys.argv[3]
-    n_servs = []
-    with open("Servs.txt", 'r') as file:
-        for i in range(5):
-            n_servs.append(file.readline())
-    servs = []
-    for num in range(1,6):
-        context = zmq.Context()
-        socket = context.socket( zmq.REQ )
-        socket.connect( 'tcp://127.0.0.{}:800{}'.format(num, num) )
-        servs.append( socket )
-    sha_servs = []
-    s_servs ={}
-    for n in range(5):
-        sha_one = sha_cad( n_servs[n] )
-        sha_servs.append( sha_one )
-        s_servs[sha_one] = servs[n]
-    sha_servs.sort()
-    rangos = []
-    for n in range( len(sha_servs)-1 ):
-        lb = sha_servs[n]
-        ub = sha_servs[n+1]
-        rangos.append( Rango( lb,ub ) )
-    rangos.append( Rango( sha_servs[4], sha_servs[0] ) )
-
-
+    context = zmq.Context()
+    socket = context.socket( zmq.REQ )
+    socket.connect( 'tcp://127.0.0.1:8001')
     if funcion == "subir":
         print("Subiendo: {}".format(aux))
         nombre = nombre.encode('utf-8')
@@ -77,18 +55,18 @@ if __name__ == '__main__':
                     if not len(arch):
                         break
                     sha_p = sha_arch( arch )
-                    for r in rangos:
-                        if r.miembro(sha_p):
-                            index.write(str(sha_p)+'\n')
-                            socket = s_servs.get(r.lb)
-                            aux = aux.encode('utf-8')
-                            socket.send_multipart([nombre, funcion, aux])
-                            aux=aux.decode('utf-8')
-                            socket.recv_string()
-                            socket.send_multipart([arch])
-                            socket.recv_string()
-                            arch = file.read(1048576)
-                            break
+                    index.write(str(sha_p)+'\n')
+                    aux = aux.encode('utf-8')
+                    socket.send_multipart([nombre, funcion, aux])
+                    print("voy1")
+                    aux=aux.decode('utf-8')
+                    socket.recv_string()
+                    print("vuelvo1")
+                    socket.send_multipart([arch])
+                    print("voy2")
+                    socket.recv_string()
+                    print("vuelvo2")
+                    arch = file.read(1048576)
     elif funcion == "descargar":
         print("Descargando: {}".format(aux))
         nombre = nombre.encode('utf-8')
@@ -102,15 +80,12 @@ if __name__ == '__main__':
                     if ( len(sha_p)==0 ):
                         break
                     sha_p = int(sha_p)
-                    for r in rangos:
-                        if r.miembro(sha_p):
-                            socket = s_servs.get(r.lb)
-                            aux= sha_p
-                            aux=str(aux)
-                            aux = aux.encode('utf-8')
-                            socket.send_multipart([nombre, funcion, aux])
-                            aux=aux.decode('utf-8')
-                            aux=int(aux)
-                            arch = socket.recv_multipart()
-                            file.write(arch[0])
-                            break
+                    aux= sha_p
+                    aux=str(aux)
+                    aux = aux.encode('utf-8')
+                    socket.send_multipart([nombre, funcion, aux])
+                    aux=aux.decode('utf-8')
+                    aux=int(aux)
+                    arch = socket.recv_multipart()
+                    file.write(arch[2])
+                    break
